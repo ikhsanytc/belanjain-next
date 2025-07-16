@@ -6,7 +6,7 @@ import { generateToken } from "@/lib/jwt";
 
 const prisma = new PrismaClient();
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
   let email: string, password: string;
   try {
     const json = await req.json();

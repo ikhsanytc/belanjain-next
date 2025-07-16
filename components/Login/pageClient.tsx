@@ -21,6 +21,7 @@ const LoginClient = () => {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<z.infer<typeof scheme>>({
     resolver: zodResolver(scheme),
@@ -34,6 +35,15 @@ const LoginClient = () => {
     mutationFn: (params: LoginToApiParams) => loginToApi(params),
     mutationKey: ["loginKey"],
     onError: (data) => {
+      if (data.message === "Email atau password salah!") {
+        setError("email", {
+          message: data.message,
+        });
+        setError("password", {
+          message: data.message,
+        });
+        return;
+      }
       console.error(data);
       toast.error(data.message);
     },
@@ -87,6 +97,11 @@ const LoginClient = () => {
                 placeholder="Email"
                 {...register("email")}
               />
+              {errors.email && (
+                <span className="text-sm text-red-500">
+                  {errors.email.message}
+                </span>
+              )}
             </div>
 
             <div className="w-full mt-4">
@@ -107,6 +122,11 @@ const LoginClient = () => {
                   {...register("password")}
                 />
               </div>
+              {errors.password && (
+                <span className="text-sm text-red-500">
+                  {errors.password.message}
+                </span>
+              )}
             </div>
 
             <button

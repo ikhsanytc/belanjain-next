@@ -36,6 +36,32 @@ export async function POST(req: NextRequest) {
   }
   try {
     const passwordHash = await bcrypt.hash(password, 10);
+    const isEmailIsTaken = await prisma.user.findUnique({ where: { email } });
+    const isUsernameIsTaken = await prisma.user.findUnique({
+      where: { name: username },
+    });
+    if (isEmailIsTaken) {
+      return Response.json(
+        {
+          error: true,
+          message: "Email sudah dipakai!",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+    if (isUsernameIsTaken) {
+      return Response.json(
+        {
+          error: true,
+          message: "Username sudah dipakai!",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
     await prisma.user.create({
       data: {
         email,

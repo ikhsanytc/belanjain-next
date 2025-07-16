@@ -1,11 +1,41 @@
 "use client";
 import { useModalMasuk } from "@/contexts/modal-masuk";
+import { loginToApi, LoginToApiParams } from "@/lib/helper-api";
 import { faEye, faEyeSlash, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import z from "zod";
+
+const scheme = z.object({
+  email: z.email({ message: "Emai tidak valid" }),
+  password: z.string(),
+});
 
 const ModalMasuk = () => {
   const { showModalMasuk, setShowModalMasuk } = useModalMasuk();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<z.infer<typeof scheme>>({
+    resolver: zodResolver(scheme),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+  const mutation = useMutation({
+    mutationFn: (params: LoginToApiParams) => loginToApi(params),
+    mutationKey: ["loginKey"],
+    onError: (data) => {
+      console.error(data.message);
+      toast.error(data.message);
+    },
+  });
   const [showPassword, setShowPassword] = useState(false);
   const modalPutihRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -22,6 +52,13 @@ const ModalMasuk = () => {
       window.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const submitLogin: SubmitHandler<z.infer<typeof scheme>> = ({
+    email,
+    password,
+  }) => {
+    alert("OKE login");
+  };
 
   return (
     <>
@@ -46,7 +83,10 @@ const ModalMasuk = () => {
             </a>
           </div>
 
-          <form className="flex flex-col gap-3 mt-7">
+          <form
+            className="flex flex-col gap-3 mt-7"
+            onSubmit={handleSubmit(submitLogin)}
+          >
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="email"
@@ -56,12 +96,20 @@ const ModalMasuk = () => {
               </label>
               <input
                 id="email"
-                name="email"
                 type="text"
                 placeholder="Masukkan email"
-                className="rounded-lg border border-slate-300 px-3 py-2 outline-blue-500"
+                className={`rounded-lg border  px-3 py-2  ${
+                  errors.email
+                    ? "border-red-500 outline-red-600"
+                    : "border-slate-300 outline-blue-500"
+                }`}
+                {...register("email")}
               />
-              <span className="text-sm text-red-500">Email tidak valid</span>
+              {errors.email && (
+                <span className="text-sm text-red-500">
+                  {errors.email.message}
+                </span>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <label
@@ -73,10 +121,14 @@ const ModalMasuk = () => {
               <div className="relative">
                 <input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Masukkan password"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-blue-500"
+                  className={`w-full rounded-lg border px-3 py-2 ${
+                    errors.password
+                      ? "border-red-500 outline-red-600"
+                      : "border-slate-300 outline-blue-500"
+                  }`}
+                  {...register("password")}
                 />
                 <div
                   className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer"
@@ -89,7 +141,11 @@ const ModalMasuk = () => {
                   )}
                 </div>
               </div>
-              <span className="text-sm text-red-500">Password salah</span>
+              {errors.password && (
+                <span className="text-sm text-red-500">
+                  {errors.password.message}
+                </span>
+              )}
             </div>
 
             <button
