@@ -1,5 +1,6 @@
 "use client";
 import { useModalMasuk } from "@/contexts/modal-masuk";
+import { useUserInfo } from "@/contexts/user";
 import { loginToApi, LoginToApiParams } from "@/lib/helper-api";
 import { faEye, faEyeSlash, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,10 +18,13 @@ const scheme = z.object({
 
 const ModalMasuk = () => {
   const { showModalMasuk, setShowModalMasuk } = useModalMasuk();
+  const { refresh, user } = useUserInfo();
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
+    setValue,
   } = useForm<z.infer<typeof scheme>>({
     resolver: zodResolver(scheme),
     defaultValues: {
@@ -32,8 +36,24 @@ const ModalMasuk = () => {
     mutationFn: (params: LoginToApiParams) => loginToApi(params),
     mutationKey: ["loginKey"],
     onError: (data) => {
-      console.error(data.message);
+      if (data.message === "Email atau password salah!") {
+        setError("email", {
+          message: data.message,
+        });
+        setError("password", {
+          message: data.message,
+        });
+        return;
+      }
+      console.error(data);
       toast.error(data.message);
+    },
+    onSuccess: async () => {
+      await refresh();
+      setShowModalMasuk(false);
+      setValue("email", "");
+      setValue("password", "");
+      toast.success(`Sukses login, welcome back`);
     },
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -57,7 +77,10 @@ const ModalMasuk = () => {
     email,
     password,
   }) => {
-    alert("OKE login");
+    mutation.mutate({
+      email,
+      password,
+    });
   };
 
   return (

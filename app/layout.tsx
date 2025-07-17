@@ -4,6 +4,7 @@ import "./globals.css";
 import { ModalMasukProvider } from "@/contexts/modal-masuk";
 import ProviderReactQuery from "@/components/provider-react-query";
 import { ToastContainer } from "react-toastify";
+import { UserProvider } from "@/contexts/user";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -26,8 +27,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className} ${poppins.variable} antialiased`}>
         <ProviderReactQuery>
-          <ModalMasukProvider>{children}</ModalMasukProvider>
-          <ToastContainer />
+          <UserProvider>
+            <ModalMasukProvider>{children}</ModalMasukProvider>
+            <ToastContainer />
+          </UserProvider>
         </ProviderReactQuery>
       </body>
     </html>

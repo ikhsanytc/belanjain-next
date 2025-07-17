@@ -1,13 +1,14 @@
 "use client";
 
+import { useUserInfo } from "@/contexts/user";
 import { loginToApi, LoginToApiParams } from "@/lib/helper-api";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import z from "zod";
@@ -30,6 +31,8 @@ const LoginClient = () => {
       password: "",
     },
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const { refresh } = useUserInfo();
   const router = useRouter();
   const mutation = useMutation({
     mutationFn: (params: LoginToApiParams) => loginToApi(params),
@@ -47,7 +50,8 @@ const LoginClient = () => {
       console.error(data);
       toast.error(data.message);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await refresh();
       toast.success("Sukses login!");
       router.push("/");
     },
@@ -112,11 +116,18 @@ const LoginClient = () => {
                     : "focus-within:border-blue-600"
                 } rounded-lg`}
               >
-                <div className="w-5 cursor-pointer">
-                  <FontAwesomeIcon icon={faEye} size="1x" />
+                <div
+                  className="w-5 cursor-pointer"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? (
+                    <FontAwesomeIcon icon={faEyeSlash} size="1x" />
+                  ) : (
+                    <FontAwesomeIcon icon={faEye} size="1x" />
+                  )}
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="outline-none w-full"
                   placeholder="Password"
                   {...register("password")}

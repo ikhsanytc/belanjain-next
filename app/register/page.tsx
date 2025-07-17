@@ -78,9 +78,7 @@ const Register = () => {
     setScorePassword(score);
   }, [password]);
   const submit: SubmitHandler<z.infer<typeof scheme>> = ({
-    email,
     password,
-    username,
     confirmPassword,
   }) => {
     if (password != confirmPassword) {

@@ -1,3 +1,6 @@
+import { User } from "@prisma/client";
+import { toast } from "react-toastify";
+
 export type RegisterToApiParams = {
   username: string;
   email: string;
@@ -69,5 +72,29 @@ export async function loginToApi({ email, password }: LoginToApiParams) {
       throw new Error(e.message);
     }
     throw new Error("Unexpected error");
+  }
+}
+
+export async function getUserInfo() {
+  try {
+    const res = await fetch("/api/getUserInfo");
+    const data = await res.json();
+    if (data.error) {
+      return null;
+    }
+    return data.data as User;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
+export async function logout() {
+  const res = await fetch("/api/logout", {
+    method: "DELETE",
+  });
+  const data = await res.json();
+  if (data.error) {
+    toast.error(data.message);
   }
 }

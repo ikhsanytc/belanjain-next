@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { checkTokenBlacklist } from "./lib/utils-server";
 
 const SECRET = new TextEncoder().encode(
   process.env.SECRET_KEY || "aku_jelek_dan_aku_bangga"
@@ -42,3 +43,7 @@ export default async function middleware(req: NextRequest) {
   }
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/((?!api|_next|static|favicon.ico).*)"],
+};

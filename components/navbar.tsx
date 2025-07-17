@@ -11,12 +11,17 @@ import ModalMasuk from "./Navbar/modal-masuk";
 import { useModalMasuk } from "@/contexts/modal-masuk";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import Link from "next/link";
+import { useUserInfo } from "@/contexts/user";
+import { logout } from "@/lib/helper-api";
 
 const Navbar = () => {
   const { setShowModalMasuk } = useModalMasuk();
+  const [showModalLogout, setShowModalLogout] = useState(false);
+  const { user, refresh } = useUserInfo();
   const [showModalSearch, setShowModalSearch] = useState(false);
   const modalSearchRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    (async () => {})();
     const handleClickOutside = (e: MouseEvent) => {
       if (
         modalSearchRef.current &&
@@ -30,7 +35,11 @@ const Navbar = () => {
       window.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  const onLogout = async () => {
+    await logout();
+    await refresh();
+    setShowModalLogout(false);
+  };
   return (
     <>
       <nav className="fixed top-0 border-b border-slate-200 w-full z-[999]">
@@ -95,23 +104,67 @@ const Navbar = () => {
               className="cursor-pointer"
             />
             <div className="border-1 h-7 border-slate-200"></div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowModalMasuk(true)}
-                className="bg-transparent py-2 font-semibold text-blue-600 rounded-lg px-3 text-sm border border-blue-600 hover:border-blue-500 hover:text-blue-500 cursor-pointer active:scale-105 transition duration-150"
-              >
-                Masuk
-              </button>
-              <Link
-                href="/register"
-                className="bg-blue-600 py-2 font-semibold text-white rounded-lg px-3 text-sm hover:bg-blue-500 cursor-pointer active:scale-105 transition duration-150"
-              >
-                Daftar
-              </Link>
-            </div>
+            {!user ? (
+              <>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowModalMasuk(true)}
+                    className="bg-transparent py-2 font-semibold text-blue-600 rounded-lg px-3 text-sm border border-blue-600 hover:border-blue-500 hover:text-blue-500 cursor-pointer active:scale-105 transition duration-150"
+                  >
+                    Masuk
+                  </button>
+                  <Link
+                    href="/register"
+                    className="bg-blue-600 py-2 font-semibold text-white rounded-lg px-3 text-sm hover:bg-blue-500 cursor-pointer active:scale-105 transition duration-150"
+                  >
+                    Daftar
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setShowModalLogout(true)}
+                  className="bg-transparent py-2 font-semibold text-red-600 rounded-lg px-3 text-sm border border-red-600 hover:border-red-500 hover:text-red-500 cursor-pointer active:scale-105 transition duration-150"
+                >
+                  Logout
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
+
+      <div
+        className={`fixed z-[9999] flex justify-center w-full h-full bg-black/50 backdrop-filter backdrop-blur-md ${
+          showModalLogout ? "opacity-100" : "opacity-0 pointer-events-none"
+        } transition-all duration-300`}
+      >
+        <div className="bg-white mt-10 shadow-2xl border border-slate-200 rounded-xl h-fit md:w-1/2 w-full">
+          <div className="p-4">
+            <h1 className="text-xl font-bold">Logout</h1>
+          </div>
+          <hr className="border-slate-200" />
+          <div className="p-4 mt-2">
+            <p className="">Anda yakin ingin logout?</p>
+          </div>
+          <hr className="border-slate-200" />
+          <div className="p-4 mt-2 flex gap-4 items-center">
+            <button
+              className="px-6 py-2 bg-red-600 rounded-xl active:scale-95 text-white font-semibold cursor-pointer transition duration-150"
+              onClick={onLogout}
+            >
+              Ya
+            </button>
+            <button
+              className="px-6 py-2 bg-slate-600 rounded-xl active:scale-95 text-white font-semibold cursor-pointer transition duration-150"
+              onClick={() => setShowModalLogout(false)}
+            >
+              Ga
+            </button>
+          </div>
+        </div>
+      </div>
 
       <ModalMasuk />
     </>

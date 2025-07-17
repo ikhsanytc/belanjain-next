@@ -17,13 +17,13 @@ model User {
   id  Int @id @default(autoincrement())
   name String @unique
   email String @unique
-  password String
+  password String @db.Text
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
 
 model Blacklist_Key {
   id Int @id @default(autoincrement())
-  token String
+  token String @db.Text
   created_at DateTime @default(now())
 }
